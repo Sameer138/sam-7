@@ -9,24 +9,18 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
-
 steps:
-- task: NuGetToolInstaller@1
-- script: dotnet build --configuration $(buildConfiguation)
-  displayName: 'dotnet build $(buildcConfiguration)'
-
-
-- task: DotNetCoreCLI@2
+- task : UseDotNet@2
   inputs:
-    command : 'publish'
-    publishWebProjects: true
-
-- task: VSBuild@1
+    packageType: 'sdk'
+    version: '6.x'
+    installationPath: $(Agent.ToolDirectory)/dotnet
+- script: |
+   dotnet build --configuration Release
+  displayName: 'Build solution'
+- task: PublishBuildArtifacts@1
   inputs:
-    azureSubscription : 'Alpha-Dotnet'
-    appType : 'webAppLinux'
-    appName : 'alpha0'
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: Container
+ 
